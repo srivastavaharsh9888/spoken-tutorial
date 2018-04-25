@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    {% load staticfiles %}
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <link href={% static 'tutorial_list/style.css' %} text="text/css" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" text="text/css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+ 
+  <title>Month Picker</title>
+</head>
+<body>
+  <div class="month-picker">
+    <fieldset class="month-picker-fieldset">
+      <input href="/jan" type="radio" name="month" value="jan" id="jan"> 
+      <label for="jan" class="month-picker-label">Jan</label>
+      <input href="/feb" type="radio" name="month" value="feb" id="feb">
+      <label for="feb" class="month-picker-label">Feb</label>
+      <input href="/mar" type="radio" name="month" value="mar" id="mar">
+      <label for="mar" class="month-picker-label">Mar</label>
+      <input href="/apr" type="radio" name="month" value="apr" id="apr">
+      <label for="apr" class="month-picker-label">Apr</label>
+      <input href="/may" type="radio" name="month" value="may" id="may">
+      <label for="may" class="month-picker-label">May</label>
+      <input href="/jun" type="radio" name="month" value="jun" id="jun">
+      <label for="jun" class="month-picker-label">Jun</label>
+      <input href="/jul" type="radio" name="month" value="jul" id="jul">
+      <label for="jul" class="month-picker-label">Jul</label>
+      <input href="/aug" type="radio" name="month" value="aug" id="aug">
+      <label for="aug" class="month-picker-label">Aug</label>
+      <input href="/sep" type="radio" name="month" value="sep" id="sep">
+      <label for="sep" class="month-picker-label">Sep</label>
+      <input href="/oct" type="radio" name="month" value="oct" id="oct">
+      <label for="oct" class="month-picker-label">Oct</label>
+      <input href="/nov" type="radio" name="month" value="nov" id="nov">
+      <label for="nov" class="month-picker-label">Nov</label>
+      <input href="/dec" type="radio" name="month" value="dec" id="dec">
+      <label for="dec" class="month-picker-label">Dec</label>
+    </fieldset>
+  </div>
+  <div class="container">
+    <div class="card">
+        <div id="load" class="card-body">
+            <h5 class="card-title">Details of the Project</h5>
+             <pre class="card-text">
+                  1) As given in the instructions four tables are made in MySQL database named user, foss, tutorial_deatis, payment.
+                  2) user table contain name of the user or contributor and id. 
+                  3) foss table contain OneToOneField to user, foss_name, id. As each foss has one contributor.
+                  4) tutorial_detail table contain four fields ForeignKey to foss_id, tut_name, last_date for submission and 
+                     actual_submit_date for submission.
+                  5) payment table contain OneToOneField with user and amount.
+                  6) Now click on the month to show the tutorial_detail table for that month with respect tolast date of 
+                     submission of user.
+                  7) On this screen click on the payment details button to see the payment table of the selected corresponding 
+                     month. 
+             </pre>
+        </div>
+    </div>
+    <br><br>
+    <center>
+      <button class="btn btn-primary">Payment Details</button>  
+    </center>
+    
+  </div>
+
+  <script>
+    $(document).ready(function(){
+      $.fn.ajaxFunction = function(reciever){ 
+        $.ajax({
+          url: '/ajax/',
+          data: {
+            'month': reciever,
+          },
+          dataType: 'Json',
+          beforeSend:function(){
+              document.getElementsByClassName("card-body")[0].innerHTML ="";
+              $('#load').addClass('loader');    
+          },
+          success: function (data) {
+            if(data[-1]!="NO ONE SUBMIITED ANY TUTORIAL THIS MONTH")
+            {
+              var output="<table><thead><tr><th><strong>SNo</strong></th><th><strong>User</strong></th><th><strong>Tutorial</strong></th><th><strong>Expected Submission Date</strong></th><th><strong>Actual Submission Date</strong></th></tr></thead><tbody>";
+              for (var i in data)
+              {
+              output+="<tr><td>"+(i)+"</td><td>"+data[i].foss_own_id+"</td><td>"+data[i].tut_name+"</td><td>"+data[i].last_date+"</ td><td>"+data[i].actual_submit_date+"</td></tr>";
+              } 
+              output+="</tbody></table>";
+              document.getElementsByClassName("card-body")[0].innerHTML=output;
+              $('table').addClass('table');
+              $('thead').addClass('mdb-color darken-3');
+            }
+            else
+            {
+                document.getElementsByClassName("card-body")[0].innerHTML=data[-1];
+            }
+            $('#load').removeClass('loader');
+          }
+      });
+    }
+    $.fn.ajaxFunctionPayment = function(reciever){ 
+        $.ajax({
+          url: '/ajax/payment_detail/',
+          data: {
+            'month': reciever,
+          },
+          dataType: 'Json',
+          beforeSend:function(){
+              document.getElementsByClassName("card-body")[0].innerHTML ="";
+              $('#load').addClass('loader');    
+          },
+          success: function (data) {
+            console.log(data);
+            if(data[-1]!="NO PAYMENTS FOR THIS MONTH")
+            {
+              var output="<table><thead><tr><th><strong>SNo</strong></th><th><strong>User</strong></th><th><strong>Payment</strong></th></thead><tbody>";
+              for (var i in data)
+              {
+              output+="<tr><td>"+(i)+"</td><td>"+data[i].user_name_id+"</td><td>"+data[i].payment_user+"</td></tr>";
+              } 
+              output+="</tbody></table>";
+              document.getElementsByClassName("card-body")[0].innerHTML=output;
+              $('table').addClass('table');
+              $('thead').addClass('mdb-color darken-3');
+            }
+            else
+            {
+                document.getElementsByClassName("card-body")[0].innerHTML=data[-1];
+            }
+            $('#load').removeClass('loader');
+          }
+      });
+    }
+      $("input").click(function(){
+        $.fn.ajaxFunction(this.id);
+      });
+      $("button").click(function(){
+        var selValue = $('input[name=month]:checked').val();
+        complete_url='payment_detail/'
+        $.fn.ajaxFunctionPayment(selValue);
+      });
+  });
+  </script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

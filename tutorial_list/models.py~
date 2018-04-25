@@ -1,0 +1,27 @@
+from __future__ import unicode_literals
+from django.db import models
+
+class user(models.Model):
+	name=models.CharField(max_length=50)
+
+	def __str__(self):
+		return str(self.name)
+
+
+class foss(models.Model):
+	contri=models.OneToOneField(user,on_delete=models.CASCADE)
+	foss_name=models.CharField(max_length=100)
+
+	def __str__(self):
+		return str(self.foss_name)
+
+class tutorial_detail(models.Model):
+	foss_own=models.ForeignKey(foss,on_delete=models.CASCADE)
+	tut_name=models.CharField(max_length=100)
+	last_date=models.DateField()
+	actual_submit_date=models.DateField(blank=True)
+
+	def __str__(self):
+		return str(self.tut_name)
+
+
